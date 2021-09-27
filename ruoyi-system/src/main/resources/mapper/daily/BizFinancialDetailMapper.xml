@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.daily.mapper.BizFinancialDetailMapper">
+
+    <resultMap type="BizFinancialDetail" id="BizFinancialDetailResult">
+        <result property="financialDetailId" column="financial_detail_id"/>
+        <result property="financialType" column="financial_type"/>
+        <result property="financialId" column="financial_id"/>
+        <result property="categoryName" column="category_name"/>
+        <result property="money" column="money"/>
+        <result property="remark" column="remark"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+    </resultMap>
+
+    <sql id="selectBizFinancialDetailVo">
+        select financial_detail_id, financial_type, financial_id, category_name, money, remark, create_time, create_by, update_time, update_by from biz_financial_detail
+    </sql>
+
+    <select id="selectBizFinancialDetailList" parameterType="BizFinancialDetail" resultMap="BizFinancialDetailResult">
+        <include refid="selectBizFinancialDetailVo"/>
+        <where>
+            <if test="financialType != null ">and financial_type = #{financialType}</if>
+            <if test="financialId != null ">and financial_id = #{financialId}</if>
+            <if test="categoryName != null  and categoryName != ''">and category_name like concat('%', #{categoryName},
+                '%')
+            </if>
+            <if test="money != null ">and money = #{money}</if>
+        </where>
+    </select>
+
+    <select id="selectBizFinancialDetailById" parameterType="Long" resultMap="BizFinancialDetailResult">
+        <include refid="selectBizFinancialDetailVo"/>
+        where financial_detail_id = #{financialDetailId}
+    </select>
+
+    <insert id="insertBizFinancialDetail" parameterType="BizFinancialDetail" useGeneratedKeys="true"
+            keyProperty="financialDetailId">
+        insert into biz_financial_detail
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="financialType != null">financial_type,</if>
+            <if test="financialId != null">financial_id,</if>
+            <if test="categoryName != null and categoryName != ''">category_name,</if>
+            <if test="money != null">money,</if>
+            <if test="remark != null">remark,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="updateBy != null">update_by,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="financialType != null">#{financialType},</if>
+            <if test="financialId != null">#{financialId},</if>
+            <if test="categoryName != null and categoryName != ''">#{categoryName},</if>
+            <if test="money != null">#{money},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+        </trim>
+    </insert>
+
+    <update id="updateBizFinancialDetail" parameterType="BizFinancialDetail">
+        update biz_financial_detail
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="financialType != null">financial_type = #{financialType},</if>
+            <if test="financialId != null">financial_id = #{financialId},</if>
+            <if test="categoryName != null and categoryName != ''">category_name = #{categoryName},</if>
+            <if test="money != null">money = #{money},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+        </trim>
+        where financial_detail_id = #{financialDetailId}
+    </update>
+
+    <delete id="deleteBizFinancialDetailById" parameterType="Long">
+        delete from biz_financial_detail where financial_detail_id = #{financialDetailId}
+    </delete>
+
+    <delete id="deleteBizFinancialDetailByIds" parameterType="String">
+        delete from biz_financial_detail where financial_detail_id in
+        <foreach item="financialDetailId" collection="array" open="(" separator="," close=")">
+            #{financialDetailId}
+        </foreach>
+    </delete>
+</mapper>

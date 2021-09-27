@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.daily.mapper.BizFinancialInfoMapper">
+
+    <resultMap type="BizFinancialInfo" id="BizFinancialInfoResult">
+        <result property="financialId" column="financial_id"/>
+        <result property="recordDate" column="record_date"/>
+        <result property="revenueMoney" column="revenue_money"/>
+        <result property="expenditureMoney" column="expenditure_money"/>
+    </resultMap>
+
+    <resultMap id="BizFinancialInfoBizFinancialDetailResult" type="BizFinancialInfo" extends="BizFinancialInfoResult">
+        <collection property="bizFinancialDetailList" notNullColumn="financial_detail_id" javaType="java.util.List"
+                    resultMap="BizFinancialDetailResult"/>
+    </resultMap>
+
+    <resultMap type="BizFinancialDetail" id="BizFinancialDetailResult">
+        <result property="financialDetailId" column="financial_detail_id"/>
+        <result property="financialType" column="financial_type"/>
+        <result property="financialId" column="financial_id"/>
+        <result property="categoryName" column="category_name"/>
+        <result property="money" column="money"/>
+        <result property="remark" column="remark"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+    </resultMap>
+
+    <sql id="selectBizFinancialInfoVo">
+        select financial_id, record_date, revenue_money, expenditure_money from biz_financial_info
+    </sql>
+
+    <select id="selectBizFinancialInfoList" parameterType="BizFinancialInfo" resultMap="BizFinancialInfoResult">
+        <include refid="selectBizFinancialInfoVo"/>
+        <where>
+            <if test="params.beginRecordDate != null and params.beginRecordDate != '' and params.endRecordDate != null and params.endRecordDate != ''">
+                and record_date between #{params.beginRecordDate} and #{params.endRecordDate}
+            </if>
+            <if test="revenueMoney != null ">and revenue_money = #{revenueMoney}</if>
+            <if test="expenditureMoney != null ">and expenditure_money = #{expenditureMoney}</if>
+        </where>
+    </select>
+
+    <select id="selectBizFinancialInfoById" parameterType="Long" resultMap="BizFinancialInfoBizFinancialDetailResult">
+        select a.financial_id, a.record_date, a.revenue_money, a.expenditure_money,
+            b.financial_detail_id, b.financial_type, b.financial_id, b.category_name, b.money, b.remark, b.create_time, b.create_by, b.update_time, b.update_by
+        from biz_financial_info a
+        left join biz_financial_detail b on b.financial_id = a.financial_id
+        where a.financial_id = #{financialId}
+    </select>
+
+    <insert id="insertBizFinancialInfo" parameterType="BizFinancialInfo" useGeneratedKeys="true"
+            keyProperty="financialId">
+        insert into biz_financial_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="recordDate != null">record_date,</if>
+            <if test="revenueMoney != null">revenue_money,</if>
+            <if test="expenditureMoney != null">expenditure_money,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="recordDate != null">#{recordDate},</if>
+            <if test="revenueMoney != null">#{revenueMoney},</if>
+            <if test="expenditureMoney != null">#{expenditureMoney},</if>
+        </trim>
+    </insert>
+
+    <update id="updateBizFinancialInfo" parameterType="BizFinancialInfo">
+        update biz_financial_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="recordDate != null">record_date = #{recordDate},</if>
+            <if test="revenueMoney != null">revenue_money = #{revenueMoney},</if>
+            <if test="expenditureMoney != null">expenditure_money = #{expenditureMoney},</if>
+        </trim>
+        where financial_id = #{financialId}
+    </update>
+
+    <delete id="deleteBizFinancialInfoById" parameterType="Long">
+        delete from biz_financial_info where financial_id = #{financialId}
+    </delete>
+
+    <delete id="deleteBizFinancialInfoByIds" parameterType="String">
+        delete from biz_financial_info where financial_id in
+        <foreach item="financialId" collection="array" open="(" separator="," close=")">
+            #{financialId}
+        </foreach>
+    </delete>
+
+    <delete id="deleteBizFinancialDetailByFinancialIds" parameterType="String">
+        delete from biz_financial_detail where financial_id in
+        <foreach item="financialId" collection="array" open="(" separator="," close=")">
+            #{financialId}
+        </foreach>
+    </delete>
+
+    <delete id="deleteBizFinancialDetailByFinancialId" parameterType="Long">
+        delete from biz_financial_detail where financial_id = #{financialId}
+    </delete>
+
+    <insert id="batchBizFinancialDetail">
+        insert into biz_financial_detail( financial_detail_id, financial_type, financial_id, category_name, money,
+        remark, create_time, create_by, update_time, update_by) values
+        <foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.financialDetailId}, #{item.financialType}, #{item.financialId}, #{item.categoryName},
+            #{item.money}, #{item.remark}, #{item.createTime}, #{item.createBy}, #{item.updateTime}, #{item.updateBy})
+        </foreach>
+    </insert>
+</mapper>
